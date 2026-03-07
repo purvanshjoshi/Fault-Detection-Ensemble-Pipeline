@@ -40,7 +40,7 @@ Single models are prone to high variance and overfitting, especially given the c
 | ---- | ----------- |
 | `solution.py` | The complete ML pipeline encompassing preprocessing, PCA/ICA extraction, model training, K-Fold loops, and inference logic. |
 | `readme.txt`  | Official dataset instructions and problem statement as provided by the ML Challenge. |
-| `submission.csv` | The generated prediction file formatted precisely for the competition evaluation (`ID, CLASS`). |
+| `FINAL.csv` | The generated prediction file formatted precisely for the competition evaluation (`ID, CLASS`). |
 | `.gitignore` | Excludes extremely large `TRAIN.csv`/`TEST.csv` dataset blobs from version control. |
 
 *Note: Due to size constraints, the raw training and testing datasets (`TRAIN.csv`, `TEST.csv`) are not included in this repository. They must be placed in the project root to run the pipeline.*
@@ -58,4 +58,4 @@ Once the `TRAIN.csv` and `TEST.csv` files are in your directory, execute the aut
 ```bash
 python solution.py
 ```
-The script will sequentially output the training progress of each fold, calculate final ensemble validation metrics, and automatically generate the compliant `submission.csv` output.
+The script will sequentially output the training progress of each fold, calculate final ensemble validation metrics, and automatically generate the compliant `FINAL.csv` output.
