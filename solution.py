@@ -1,21 +1,29 @@
+"""
+ML Challenge Fault Detection Ensemble Pipeline.
+This module trains a 5-Fold Stratified Ensemble (XGBoost, LightGBM, CatBoost)
+with PCA/ICA and row-wise statistical feature engineering to detect subsystem faults.
+"""
+import warnings
 import pandas as pd
 import numpy as np
+
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA, FastICA
+from sklearn.metrics import f1_score, roc_auc_score, accuracy_score
+
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
-from sklearn.metrics import f1_score, roc_auc_score, accuracy_score
-import warnings
+
 warnings.filterwarnings('ignore')
 
 print("Loading data...")
 train = pd.read_csv('TRAIN.csv')
 test = pd.read_csv('TEST.csv')
 
-features = [c for c in train.columns if c != 'Class']
-target = 'Class'
+FEATURES = [c for c in train.columns if c != 'Class']
+TARGET = 'Class'
 
 print(f"Train shape: {train.shape}, Test shape: {test.shape}")
 
@@ -24,12 +32,12 @@ all_data = pd.concat([train[features], test[features]], axis=0).reset_index(drop
 
 # 1. Feature Engineering: Row-wise statistics
 print("Generating row-wise statistical features...")
-all_data['std'] = all_data[features].std(axis=1)
-all_data['mean'] = all_data[features].mean(axis=1)
-all_data['max'] = all_data[features].max(axis=1)
-all_data['min'] = all_data[features].min(axis=1)
-all_data['skew'] = all_data[features].skew(axis=1)
-all_data['kurt'] = all_data[features].kurtosis(axis=1)
+all_data['std'] = all_data[FEATURES].std(axis=1)
+all_data['mean'] = all_data[FEATURES].mean(axis=1)
+all_data['max'] = all_data[FEATURES].max(axis=1)
+all_data['min'] = all_data[FEATURES].min(axis=1)
+all_data['skew'] = all_data[FEATURES].skew(axis=1)
+all_data['kurt'] = all_data[FEATURES].kurtosis(axis=1)
 
 # 2. Scaling
 print("Scaling features...")
@@ -51,7 +59,7 @@ for i in range(5):
 
 # Split back to train and test
 X_train = scaled_df.iloc[:len(train)].copy()
-y_train = train[target].values
+y_train = train[TARGET].values
 X_test = scaled_df.iloc[len(train):].copy()
 
 test_ids = test['ID'].values
@@ -59,8 +67,8 @@ test_ids = test['ID'].values
 print(f"Final Train shape: {X_train.shape}, Final Test shape: {X_test.shape}")
 
 # 4. Model Training with K-Fold Cross Validation
-folds = 5
-skf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
+FOLDS = 5
+skf = StratifiedKFold(n_splits=FOLDS, shuffle=True, random_state=42)
 
 # Initializing Out-Of-Fold and Test prediction arrays
 xgb_preds = np.zeros(len(X_test))
@@ -74,12 +82,11 @@ cat_oof = np.zeros(len(X_train))
 # Compute class weight for imbalance
 pos_weight = (len(y_train) - sum(y_train)) / sum(y_train)
 
-print(f"Starting {folds}-Fold Training...")
+print(f"Starting {FOLDS}-Fold Training...")
 for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
     print(f"--- Fold {fold+1} ---")
     X_tr, y_tr = X_train.iloc[train_idx], y_train[train_idx]
     X_va, y_va = X_train.iloc[val_idx], y_train[val_idx]
-    
     # 1. XGBoost
     xgb_model = XGBClassifier(
         n_estimators=1000,
@@ -94,8 +101,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
     )
     xgb_model.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], verbose=False)
     xgb_oof[val_idx] = xgb_model.predict_proba(X_va)[:, 1]
-    xgb_preds += xgb_model.predict_proba(X_test)[:, 1] / folds
-    
+    xgb_preds += xgb_model.predict_proba(X_test)[:, 1] / FOLDS
     # 2. LightGBM
     lgb_model = LGBMClassifier(
         n_estimators=1000,
@@ -108,9 +114,10 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
         n_jobs=-1
     )
     # LGBM early stopping handles differently
-    lgb_model.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], callbacks=[]) # simple fit, LGBM early stopping needs callbacks but let's just train
+    # simple fit, LGBM early stopping needs callbacks but let's just train
+    lgb_model.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], callbacks=[])
     lgb_oof[val_idx] = lgb_model.predict_proba(X_va)[:, 1]
-    lgb_preds += lgb_model.predict_proba(X_test)[:, 1] / folds
+    lgb_preds += lgb_model.predict_proba(X_test)[:, 1] / FOLDS
 
     # 3. CatBoost
     cat_model = CatBoostClassifier(
@@ -124,7 +131,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
     )
     cat_model.fit(X_tr, y_tr, eval_set=(X_va, y_va), verbose=False)
     cat_oof[val_idx] = cat_model.predict_proba(X_va)[:, 1]
-    cat_preds += cat_model.predict_proba(X_test)[:, 1] / folds
+    cat_preds += cat_model.predict_proba(X_test)[:, 1] / FOLDS
 
 print("Evaluating OOF (Out-of-Fold) Predictions...")
 for name, oof in zip(['XGB', 'LGB', 'CAT'], [xgb_oof, lgb_oof, cat_oof]):
