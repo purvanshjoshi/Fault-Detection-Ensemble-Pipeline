@@ -43,19 +43,20 @@ all_data['kurt'] = all_data[FEATURES].kurtosis(axis=1)
 print("Scaling features...")
 scaler = StandardScaler()
 scaled_features = scaler.fit_transform(all_data)
+# Column names are preserved in all_data, but result is a numpy array
 scaled_df = pd.DataFrame(scaled_features, columns=all_data.columns)
 
 # 3. Dimensionality Reduction Features (PCA & ICA)
 print("Generating PCA and ICA features...")
 pca = PCA(n_components=5, random_state=42)
-pca_features = pca.fit_transform(scaled_features)
+pca_features_array = pca.fit_transform(scaled_features)
 for i in range(5):
-    scaled_df[f'pca_{i}'] = pca_features[:, i]
+    scaled_df[f'pca_{i}'] = pca_features_array[:, i]
 
 ica = FastICA(n_components=5, random_state=42)
-ica_features = ica.fit_transform(scaled_features)
+ica_features_array = ica.fit_transform(scaled_features)
 for i in range(5):
-    scaled_df[f'ica_{i}'] = ica_features[:, i]
+    scaled_df[f'ica_{i}'] = ica_features_array[:, i]
 
 # Split back to train and test
 X_train = scaled_df.iloc[:len(train)].copy()
@@ -87,6 +88,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
     print(f"--- Fold {fold+1} ---")
     X_tr, y_tr = X_train.iloc[train_idx], y_train[train_idx]
     X_va, y_va = X_train.iloc[val_idx], y_train[val_idx]
+
     # 1. XGBoost
     xgb_model = XGBClassifier(
         n_estimators=1000,
@@ -102,6 +104,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
     xgb_model.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], verbose=False)
     xgb_oof[val_idx] = xgb_model.predict_proba(X_va)[:, 1]
     xgb_preds += xgb_model.predict_proba(X_test)[:, 1] / FOLDS
+
     # 2. LightGBM
     lgb_model = LGBMClassifier(
         n_estimators=1000,
@@ -111,11 +114,11 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
         colsample_bytree=0.8,
         class_weight='balanced',
         random_state=42 + fold,
-        n_jobs=-1
+        n_jobs=-1,
+        verbose=-1 # reduce noise
     )
-    # LGBM early stopping handles differently
-    # simple fit, LGBM early stopping needs callbacks but let's just train
-    lgb_model.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], callbacks=[])
+    # simple fit
+    lgb_model.fit(X_tr, y_tr, eval_set=[(X_va, y_va)])
     lgb_oof[val_idx] = lgb_model.predict_proba(X_va)[:, 1]
     lgb_preds += lgb_model.predict_proba(X_test)[:, 1] / FOLDS
 
