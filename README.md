@@ -19,7 +19,7 @@ Our approach moves beyond basic classification by dynamically generating a holis
 ### 1. Dynamic Feature Engineering
 Instead of relying solely on individual sensor readings, the system engineers deep, localized context for every single operational event:
 *   **Row-Wise Statistical Signatures**: For every row (device cycle), we compute the `mean`, `std`, `min`, `max`, `skew`, and `kurtosis` across all 47 features. This mathematically captures the overall variation, asymmetry, and extremes of the hardware's operating state in that exact moment.
-*   **Dimensionality Reduction (PCA & ICA)**: Complex failure modes often manifest as subtle anomalies spanning *multiple* sensors simultaneously. To detect this, we apply Principal Component Analysis (PCA) and Independent Component Analysis (ICA) to the scaled feature set. We extract 10 highly-compressed, orthogonal meta-features that isolate global variance patterns and independent noise signals that standard decision trees would struggle to split on individually.
+*   **Dimensionality Reduction (PCA & ICA)**: Complex failure modes often manifest as subtle anomalies spanning *multiple* sensors simultaneously. To detect this, we apply Principal Component Analysis (PCA) and Independent Component Analysis (ICA) to the scaled feature set. We extract 10 highly compressed, orthogonal meta-features that isolate global variance patterns and independent noise signals that standard decision trees would struggle to split on individually.
 
 ### 2. The 5-Fold Stratified Ensemble
 Single models are prone to high variance and overfitting, especially given the class imbalance present in tabular sensor data (60% Normal / 40% Faulty). To maximize generalization on unseen test data, we deployed an ensemble:
@@ -40,7 +40,7 @@ Single models are prone to high variance and overfitting, especially given the c
 | ---- | ----------- |
 | `solution.py` | The complete ML pipeline encompassing preprocessing, PCA/ICA extraction, model training, K-Fold loops, and inference logic. |
 | `readme.txt`  | Official dataset instructions and problem statement as provided by the ML Challenge. |
-| `FINAL.csv` | The generated prediction file formatted precisely for the competition evaluation (`ID, CLASS`). |
+| `FINAL.csv` | The generated prediction file is formatted precisely for the competition evaluation (`ID, CLASS`). |
 | `.gitignore` | Excludes extremely large `TRAIN.csv`/`TEST.csv` dataset blobs from version control. |
 
 *Note: Due to size constraints, the raw training and testing datasets (`TRAIN.csv`, `TEST.csv`) are not included in this repository. They must be placed in the project root to run the pipeline.*
@@ -58,4 +58,4 @@ Once the `TRAIN.csv` and `TEST.csv` files are in your directory, execute the aut
 ```bash
 python solution.py
 ```
-The script will sequentially output the training progress of each fold, calculate final ensemble validation metrics, and automatically generate the compliant `FINAL.csv` output.
+The script will sequentially output the training progress for each fold, compute the final ensemble validation metrics, and automatically generate the compliant `FINAL.csv` output.
