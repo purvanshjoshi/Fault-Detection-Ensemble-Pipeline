@@ -28,7 +28,7 @@ TARGET = 'Class'
 print(f"Train shape: {train.shape}, Test shape: {test.shape}")
 
 # Concatenate for uniform feature engineering
-all_data = pd.concat([train[features], test[features]], axis=0).reset_index(drop=True)
+all_data = pd.concat([train[FEATURES], test[FEATURES]], axis=0).reset_index(drop=True)
 
 # 1. Feature Engineering: Row-wise statistics
 print("Generating row-wise statistical features...")
