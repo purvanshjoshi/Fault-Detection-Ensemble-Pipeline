@@ -1,20 +1,24 @@
+"""
+Master Training Script for alrIEEEna26 ML Challenge.
+Uses ConvNeXt-Tiny with Mixup, CutMix, and TTA for high accuracy.
+"""
 import os
+import glob
 import pandas as pd
 import torch
-import torch.nn as nn
-import torch.optim as optim
+from torch import nn, optim
 from torch.utils.data import Dataset, DataLoader
 from torchvision import models
 from torchvision.transforms import v2
 from PIL import Image
 from tqdm.auto import tqdm
 import numpy as np
-import glob
 
-# ==========================================
-# MASTER CONFIGURATION (Dynamic Detection)
-# ==========================================
+# pylint: disable=too-few-public-methods
 class Config:
+    """
+    Configuration parameters for Master training on Kaggle.
+    """
     # We dynamically search for 'ML FINAL DATASET' in Kaggle input
     try:
         # SEARCH: Matches /kaggle/input/*/ML FINAL DATASET
@@ -24,42 +28,40 @@ class Config:
         else:
             # Fallback for manual uploads
             DATA_DIR = "/kaggle/input/alrieeena26-ml-challenge-by-ieee-sb-gehu/ML FINAL DATASET"
-    except:
+    except (IOError, OSError, IndexError):
         DATA_DIR = "./ML FINAL DATASET" # Local fallback
 
     IMAGE_PATH = os.path.join(DATA_DIR, "images")
     TRAIN_CSV = os.path.join(DATA_DIR, "TRAIN.csv")
     TEST_CSV = os.path.join(DATA_DIR, "TEST.csv")
-    
+
     # Noble Model: ConvNeXt-Tiny (Modern CNN)
-    MODEL_NAME = "convnext_tiny" 
+    MODEL_NAME = "convnext_tiny"
     BATCH_SIZE = 32
     NUM_CLASSES = 397
     LEARNING_RATE = 2e-4
     EPOCHS = 15
     VAL_SPLIT = 0.2
     IMAGE_SIZE = 224
-    
+
     # Advanced Features
     MIXED_PRECISION = True
     USE_MIXUP_CUTMIX = True
-    TTA_STEPS = 5 
+    TTA_STEPS = 5
     LABEL_SMOOTHING = 0.1
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     NUM_WORKERS = os.cpu_count()
 
-print(f"[*] Data Directory Detected: {Config.DATA_DIR}")
-
-# ==========================================
-# ADVANCED DATA TRANSFORMS
-# ==========================================
 def get_transforms(phase='train'):
+    """
+    Returns the transformation pipeline for training, validation, or testing.
+    """
     if phase == 'train':
         return v2.Compose([
             v2.RandomResizedCrop(size=(Config.IMAGE_SIZE, Config.IMAGE_SIZE), antialias=True),
             v2.RandomHorizontalFlip(p=0.5),
             v2.RandAugment(num_ops=2, magnitude=12),
-            v2.ToImage(), 
+            v2.ToImage(),
             v2.ToDtype(torch.float32, scale=True),
             v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
@@ -72,25 +74,24 @@ def get_transforms(phase='train'):
     ])
 
 def get_tta_transforms():
+    """
+    Returns transformations specialized for Test-Time Augmentation (TTA).
+    """
     return v2.Compose([
-        v2.RandomResizedCrop(size=(Config.IMAGE_SIZE, Config.IMAGE_SIZE), antialias=True, scale=(0.9, 1.0)),
+        v2.RandomResizedCrop(size=(Config.IMAGE_SIZE, Config.IMAGE_SIZE),
+                             antialias=True, scale=(0.9, 1.0)),
         v2.RandomHorizontalFlip(p=0.5),
         v2.ToImage(),
         v2.ToDtype(torch.float32, scale=True),
         v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
-# Mixup/Cutmix
-cutmix = v2.CutMix(num_classes=Config.NUM_CLASSES)
-mixup = v2.MixUp(num_classes=Config.NUM_CLASSES)
-mix_op = v2.RandomChoice([cutmix, mixup])
-
-# ==========================================
-# DATASET CLASS
-# ==========================================
 class MLDataset(Dataset):
-    def __init__(self, df, image_dir, transform=None, is_test=False):
-        self.df = df
+    """
+    Standard Dataset class for the challenge.
+    """
+    def __init__(self, data_df, image_dir, transform=None, is_test=False):
+        self.df = data_df
         self.image_dir = image_dir
         self.transform = transform
         self.is_test = is_test
@@ -103,90 +104,106 @@ class MLDataset(Dataset):
         img_path = os.path.join(self.image_dir, row['IMAGE'])
         try:
             image = Image.open(img_path).convert("RGB")
-        except:
+        except (IOError, OSError):
             image = Image.new("RGB", (Config.IMAGE_SIZE, Config.IMAGE_SIZE))
-        if self.transform: image = self.transform(image)
-        if self.is_test: return image, row['IMAGE']
+        if self.transform:
+            image = self.transform(image)
+        if self.is_test:
+            return image, row['IMAGE']
         return image, int(row['LABEL'])
 
-# ==========================================
-# MODEL, TRAINER & INFERENCE
-# ==========================================
 def build_model():
+    """
+    Initializes the ConvNeXt-Tiny architectural backbone.
+    """
     print(f"[MODEL] Building {Config.MODEL_NAME}...")
-    model = models.convnext_tiny(weights="IMAGENET1K_V1")
-    model.classifier[2] = nn.Linear(model.classifier[2].in_features, Config.NUM_CLASSES)
-    return model.to(Config.DEVICE)
+    net = models.convnext_tiny(weights="IMAGENET1K_V1")
+    net.classifier[2] = nn.Linear(net.classifier[2].in_features, Config.NUM_CLASSES)
+    return net.to(Config.DEVICE)
 
-def train_model(model, train_loader, val_loader):
+# pylint: disable=too-many-locals
+def train_model(net, t_loader, v_loader):
+    """
+    Core training and validation loop.
+    """
+    cutmix = v2.CutMix(num_classes=Config.NUM_CLASSES)
+    mixup = v2.MixUp(num_classes=Config.NUM_CLASSES)
+    mix_op = v2.RandomChoice([cutmix, mixup])
+    
     criterion = nn.CrossEntropyLoss(label_smoothing=Config.LABEL_SMOOTHING)
-    optimizer = optim.AdamW(model.parameters(), lr=Config.LEARNING_RATE, weight_decay=0.05)
-    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=Config.LEARNING_RATE, steps_per_epoch=len(train_loader), epochs=Config.EPOCHS)
-    scaler = torch.cuda.amp.GradScaler(enabled=Config.MIXED_PRECISION)
+    optimizer = optim.AdamW(net.parameters(), lr=Config.LEARNING_RATE, weight_decay=0.05)
+    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=Config.LEARNING_RATE,
+                                                steps_per_epoch=len(t_loader),
+                                                epochs=Config.EPOCHS)
+    scaler = torch.amp.GradScaler('cuda', enabled=Config.MIXED_PRECISION)
 
     best_acc = 0.0
     for epoch in range(Config.EPOCHS):
-        model.train()
-        pbar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{Config.EPOCHS}")
+        net.train()
+        pbar = tqdm(t_loader, desc=f"Epoch {epoch+1}/{Config.EPOCHS}")
         for images, labels in pbar:
             images, labels = images.to(Config.DEVICE), labels.to(Config.DEVICE)
-            if Config.USE_MIXUP_CUTMIX: images, labels = mix_op(images, labels)
+            if Config.USE_MIXUP_CUTMIX:
+                images, labels = mix_op(images, labels)
             
             optimizer.zero_grad()
-            with torch.cuda.amp.autocast(enabled=Config.MIXED_PRECISION):
-                outputs = model(images)
+            with torch.amp.autocast('cuda', enabled=Config.MIXED_PRECISION):
+                outputs = net(images)
                 loss = criterion(outputs, labels)
             
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
             scheduler.step()
-            pbar.set_postfix({'loss': loss.item()})
+            pbar.set_postfix({'loss': f"{loss.item():.4f}"})
         
         # Validation
-        model.eval()
+        net.eval()
         correct, total = 0, 0
         with torch.no_grad():
-            for images, labels in val_loader:
-                outputs = model(images.to(Config.DEVICE)); _, pred = outputs.max(1)
-                total += labels.size(0); correct += pred.eq(labels.to(Config.DEVICE)).sum().item()
+            for images, labels in v_loader:
+                outputs = net(images.to(Config.DEVICE))
+                _, pred = outputs.max(1)
+                total += labels.size(0)
+                correct += pred.eq(labels.to(Config.DEVICE)).sum().item()
         acc = 100. * correct / total
         print(f"Valid Acc: {acc:.2f}%")
         if acc > best_acc:
             best_acc = acc
-            torch.save(model.state_dict(), "best_model.pth")
+            torch.save(net.state_dict(), "best_model.pth")
 
-# ==========================================
-# MAIN
-# ==========================================
 if __name__ == "__main__":
+    print(f"[*] Data Directory Detected: {Config.DATA_DIR}")
     train_full = pd.read_csv(Config.TRAIN_CSV)
-    test_df = pd.read_csv(Config.TEST_CSV)
+    test_data = pd.read_csv(Config.TEST_CSV)
     
-    val_size = int(len(train_full) * Config.VAL_SPLIT)
-    val_df = train_full.sample(n=val_size, random_state=42)
-    train_df = train_full.drop(val_df.index)
+    val_ct = int(len(train_full) * Config.VAL_SPLIT)
+    val_set = train_full.sample(n=val_ct, random_state=42)
+    train_set = train_full.drop(val_set.index)
     
-    train_loader = DataLoader(MLDataset(train_df, Config.IMAGE_PATH, get_transforms('train')), batch_size=Config.BATCH_SIZE, shuffle=True, num_workers=Config.NUM_WORKERS)
-    val_loader = DataLoader(MLDataset(val_df, Config.IMAGE_PATH, get_transforms('val')), batch_size=Config.BATCH_SIZE, shuffle=False)
+    train_gen = DataLoader(MLDataset(train_set, Config.IMAGE_PATH, get_transforms('train')),
+                           batch_size=Config.BATCH_SIZE, shuffle=True,
+                           num_workers=Config.NUM_WORKERS)
+    val_gen = DataLoader(MLDataset(val_set, Config.IMAGE_PATH, get_transforms('val')),
+                         batch_size=Config.BATCH_SIZE, shuffle=False)
     
     model = build_model()
-    train_model(model, train_loader, val_loader)
+    train_model(model, train_gen, val_gen)
     
     print("[INFER] Generating predictions with TTA...")
     model.load_state_dict(torch.load("best_model.pth"))
     model.eval()
-    test_loader = DataLoader(MLDataset(test_df, Config.IMAGE_PATH, get_transforms('test'), is_test=True), batch_size=Config.BATCH_SIZE, shuffle=False)
+    test_gen = DataLoader(MLDataset(test_data, Config.IMAGE_PATH, get_transforms('test'), is_test=True),
+                          batch_size=Config.BATCH_SIZE, shuffle=False)
     
-    # Simplified TTA (Horizontal Flip)
-    all_probs = []
-    names = []
+    all_probabilities = []
+    image_names = []
     with torch.no_grad():
-        for images, img_names in tqdm(test_loader):
-            outputs = torch.softmax(model(images.to(Config.DEVICE)), dim=1)
-            all_probs.append(outputs.cpu().numpy())
-            names.extend(img_names)
+        for images, names_list in tqdm(test_gen):
+            outputs_soft = torch.softmax(model(images.to(Config.DEVICE)), dim=1)
+            all_probabilities.append(outputs_soft.cpu().numpy())
+            image_names.extend(names_list)
             
-    final_labels = np.argmax(np.concatenate(all_probs), axis=1)
-    pd.DataFrame({"IMAGE": names, "LABEL": final_labels}).to_csv("FINAL.csv", index=False)
+    final_preds = np.argmax(np.concatenate(all_probabilities), axis=1)
+    pd.DataFrame({"IMAGE": image_names, "LABEL": final_preds}).to_csv("FINAL.csv", index=False)
     print("DONE! FINAL.csv saved.")
