@@ -130,7 +130,7 @@ def train_model(net, t_loader, v_loader):
     cutmix = v2.CutMix(num_classes=Config.NUM_CLASSES)
     mixup = v2.MixUp(num_classes=Config.NUM_CLASSES)
     mix_op = v2.RandomChoice([cutmix, mixup])
-    
+
     criterion = nn.CrossEntropyLoss(label_smoothing=Config.LABEL_SMOOTHING)
     optimizer = optim.AdamW(net.parameters(), lr=Config.LEARNING_RATE, weight_decay=0.05)
     scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=Config.LEARNING_RATE,
@@ -146,24 +146,24 @@ def train_model(net, t_loader, v_loader):
             imgs, labels = imgs.to(Config.DEVICE), labels.to(Config.DEVICE)
             if Config.USE_MIXUP_CUTMIX:
                 imgs, labels = mix_op(imgs, labels)
-            
+
             optimizer.zero_grad()
             with torch.amp.autocast('cuda', enabled=Config.MIXED_PRECISION):
                 outputs = net(imgs)
                 loss = criterion(outputs, labels)
-            
+
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
             scheduler.step()
             pbar.set_postfix({'loss': f"{loss.item():.4f}"})
-        
+
         # Validation
         net.eval()
         correct, total = 0, 0
         with torch.no_grad():
-            for images, labels in v_loader:
-                outputs = net(images.to(Config.DEVICE))
+            for v_imgs, labels in v_loader:
+                outputs = net(v_imgs.to(Config.DEVICE))
                 _, pred = outputs.max(1)
                 total += labels.size(0)
                 correct += pred.eq(labels.to(Config.DEVICE)).sum().item()
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     print(f"[*] Data Directory Detected: {Config.DATA_DIR}")
     train_full = pd.read_csv(Config.TRAIN_CSV)
     test_data = pd.read_csv(Config.TEST_CSV)
-    
+
     val_ct = int(len(train_full) * Config.VAL_SPLIT)
     val_set = train_full.sample(n=val_ct, random_state=42)
     train_set = train_full.drop(val_set.index)
@@ -187,7 +187,7 @@ if __name__ == "__main__":
                            num_workers=Config.NUM_WORKERS)
     val_gen = DataLoader(MLDataset(val_set, Config.IMAGE_PATH, get_transforms('val')),
                          batch_size=Config.BATCH_SIZE, shuffle=False)
-    
+
     model = build_model()
     train_model(model, train_gen, val_gen)
     
@@ -201,8 +201,8 @@ if __name__ == "__main__":
     all_probabilities = []
     image_names = []
     with torch.no_grad():
-        for images, names_list in tqdm(test_gen):
-            outputs_soft = torch.softmax(model(images.to(Config.DEVICE)), dim=1)
+        for t_imgs, names_list in tqdm(test_gen):
+            outputs_soft = torch.softmax(model(t_imgs.to(Config.DEVICE)), dim=1)
             all_probabilities.append(outputs_soft.cpu().numpy())
             image_names.extend(names_list)
             
