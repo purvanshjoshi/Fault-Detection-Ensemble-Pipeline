@@ -3,14 +3,14 @@
   <img src="https://img.shields.io/badge/Model-ConvNeXt--Tiny-orange?style=for-the-badge&logo=pytorch" alt="Model Badge">
   <img src="https://img.shields.io/badge/Rank-Top--50-success?style=for-the-badge" alt="Rank Badge">
 
-  <h1>🏢 ML Arena Finale: The "Noble" Pipeline</h1>
+  <h1>🏢 Technical Finale: The "Noble" Pipeline</h1>
   <p><b>Fine-Grained Scene Recognition for 397 Categories using Modern Deep Learning Backbones</b></p>
 </div>
 
 <br>
 
 ## 📌 Approach Overview
-This repository contains the complete **"Noble"** pipeline developed for the final stage of the **alrIEEEna26 ML Challenge**. Shifting from sensor-based diagnostics to **high-dimensional image classification**, this solution targeting 397 distinct scene categories (SUN397 benchmark).
+This repository contains the complete **"Noble"** pipeline developed for the final stage of a prestigious **Machine Learning Challenge**. Shifting from sensor-based diagnostics to **high-dimensional image classification**, this solution targeting 397 distinct scene categories (SUN397 benchmark).
 
 By combining a state-of-the-art **ConvNeXt** backbone with advanced stochastic regularization and test-time augmentation, this pipeline achieves elite-level generalization across complex spatial contexts.
 

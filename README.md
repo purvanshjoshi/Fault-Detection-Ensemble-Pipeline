@@ -12,7 +12,7 @@
 <br>
 
 ## 📌 Project Overview
-Developed for the **IEEE SB, GEHU ML Challenge**, this repository houses a highly robust machine learning pipeline designed to monitor and diagnose embedded subsystem health. 
+Developed for a high-performance **Machine Learning Challenge**, this repository houses a highly robust machine learning pipeline designed to monitor and diagnose embedded subsystem health. 
 
 The core objective is binary classification: determining whether a device is operating under **Normal (0)** or **Faulty (1)** conditions based on an anonymized dataset of 47 numerical sensor readings. These readings capture real-time performance metrics, internal states, and environmental interactions.
 
@@ -52,8 +52,8 @@ Sensor data is notoriously noisy, and the provided dataset contained a significa
 | File | Type | Description |
 | :--- | :--- | :--- |
 | `solution.py` | `<Python Script>` | The complete autonomous ML pipeline (Preprocessing -> PCA/ICA -> K-Fold Training -> Blending -> Inference). |
-| `ml_arena_finale_top_50_teams/` | `<Folder>` | **[NEW]** Complete "Noble" Image Classification pipeline for the ML Arena Finale. |
-| `readme.txt`  | `<Documentation>` | The official ML Challenge dataset instructions and problem context guidelines. |
+| `noble_finale_technical_suite/` | `<Folder>` | **[NEW]** Complete "Noble" Image Classification pipeline for the Technical Finale. |
+| `readme.txt`  | `<Documentation>` | The official technical challenge dataset instructions and problem context guidelines. |
 | `FINAL.csv` | `<Data File>` | The successfully generated prediction matrix formatted precisely for competition evaluation (`ID, CLASS`). |
 | `.gitignore` | `<Config>` | Prevents tracking of the massive `TRAIN.csv` and `TEST.csv` files to keep the repository lightweight. |
 

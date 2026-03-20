@@ -1,5 +1,5 @@
 """
-Master Training Script for alrIEEEna26 ML Challenge.
+Master Training Script for High-Performance Image Classification.
 Uses ConvNeXt-Tiny with Mixup, CutMix, and TTA for high accuracy.
 """
 # pylint: disable=import-error

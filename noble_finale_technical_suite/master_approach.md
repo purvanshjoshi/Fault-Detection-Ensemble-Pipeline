@@ -1,5 +1,5 @@
 # Technical Evaluation: High-Performance Image Classification Strategy
-**Team**: [Your Team Name] | **Challenge**: alrIEEEna26 ML Challenge
+**Team**: [Your Team Name] | **Challenge**: Image Scene Recognition
 
 ## 1. Executive Summary
 Our solution leverages a modern, robust deep learning pipeline specifically optimized for **fine-grained scene recognition** on the **397 categories** of this challenge (aligning with the SUN397 benchmark). By integrating a state-of-the-art **ConvNeXt** backbone with advanced regularization techniques (**Mixup/CutMix**) and a optimized learning schedule (**OneCycleLR**), we achieve superior generalization for diverse spatial contexts—from intricate cathedral interiors to vast outdoor amphitheaters.
