@@ -181,7 +181,6 @@ if __name__ == "__main__":
     val_ct = int(len(train_full) * Config.VAL_SPLIT)
     val_set = train_full.sample(n=val_ct, random_state=42)
     train_set = train_full.drop(val_set.index)
-    
     train_gen = DataLoader(MLDataset(train_set, Config.IMAGE_PATH, get_transforms('train')),
                            batch_size=Config.BATCH_SIZE, shuffle=True,
                            num_workers=Config.NUM_WORKERS)
@@ -190,14 +189,12 @@ if __name__ == "__main__":
 
     model = build_model()
     train_model(model, train_gen, val_gen)
-    
     print("[INFER] Generating predictions with TTA...")
     model.load_state_dict(torch.load("best_model.pth"))
     model.eval()
     test_gen = DataLoader(MLDataset(test_data, Config.IMAGE_PATH,
                                     get_transforms('test'), is_test=True),
                           batch_size=Config.BATCH_SIZE, shuffle=False)
-    
     all_probabilities = []
     image_names = []
     with torch.no_grad():
@@ -205,7 +202,6 @@ if __name__ == "__main__":
             outputs_soft = torch.softmax(model(t_imgs.to(Config.DEVICE)), dim=1)
             all_probabilities.append(outputs_soft.cpu().numpy())
             image_names.extend(names_list)
-            
     final_preds = np.argmax(np.concatenate(all_probabilities), axis=1)
     pd.DataFrame({"IMAGE": image_names, "LABEL": final_preds}).to_csv("FINAL.csv", index=False)
     print("DONE! FINAL.csv saved.")
