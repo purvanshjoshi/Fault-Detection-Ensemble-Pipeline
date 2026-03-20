@@ -2,6 +2,7 @@
 Local Fast-Track Training Script for alrIEEEna26 ML Challenge.
 Uses MobileNetV3-Small for rapid training on local hardware.
 """
+# pylint: disable=import-error
 import os
 import pandas as pd
 import torch
@@ -61,6 +62,7 @@ class FastDataset(Dataset):
             return image, row['IMAGE']
         return image, int(row['LABEL'])
 
+# pylint: disable=too-many-locals
 def run_local_training():
     """
     Main training and inference execution loop.

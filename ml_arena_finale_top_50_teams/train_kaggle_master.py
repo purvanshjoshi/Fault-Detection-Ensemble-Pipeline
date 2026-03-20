@@ -2,6 +2,7 @@
 Master Training Script for alrIEEEna26 ML Challenge.
 Uses ConvNeXt-Tiny with Mixup, CutMix, and TTA for high accuracy.
 """
+# pylint: disable=import-error
 import os
 import glob
 import pandas as pd
@@ -141,14 +142,14 @@ def train_model(net, t_loader, v_loader):
     for epoch in range(Config.EPOCHS):
         net.train()
         pbar = tqdm(t_loader, desc=f"Epoch {epoch+1}/{Config.EPOCHS}")
-        for images, labels in pbar:
-            images, labels = images.to(Config.DEVICE), labels.to(Config.DEVICE)
+        for imgs, labels in pbar:
+            imgs, labels = imgs.to(Config.DEVICE), labels.to(Config.DEVICE)
             if Config.USE_MIXUP_CUTMIX:
-                images, labels = mix_op(images, labels)
+                imgs, labels = mix_op(imgs, labels)
             
             optimizer.zero_grad()
             with torch.amp.autocast('cuda', enabled=Config.MIXED_PRECISION):
-                outputs = net(images)
+                outputs = net(imgs)
                 loss = criterion(outputs, labels)
             
             scaler.scale(loss).backward()
@@ -193,7 +194,8 @@ if __name__ == "__main__":
     print("[INFER] Generating predictions with TTA...")
     model.load_state_dict(torch.load("best_model.pth"))
     model.eval()
-    test_gen = DataLoader(MLDataset(test_data, Config.IMAGE_PATH, get_transforms('test'), is_test=True),
+    test_gen = DataLoader(MLDataset(test_data, Config.IMAGE_PATH,
+                                    get_transforms('test'), is_test=True),
                           batch_size=Config.BATCH_SIZE, shuffle=False)
     
     all_probabilities = []
