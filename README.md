@@ -3,6 +3,7 @@
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Badge">
   <img src="https://img.shields.io/badge/Scikit--Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" alt="Scikit-Learn Badge">
   <img src="https://img.shields.io/badge/IEEE-00629B?style=for-the-badge&logo=ieee&logoColor=white" alt="IEEE Badge">
+  <img src="https://img.shields.io/badge/Finale--Ready-ConvNeXt-blueviolet?style=for-the-badge" alt="Finale Badge">
 
   <h1>🏭 Fault Diagnostics Ensemble Pipeline</h1>
   <p><b>An Advanced Machine Learning Architecture for High-Precision Hardware Anomaly Detection</b></p>
@@ -51,6 +52,7 @@ Sensor data is notoriously noisy, and the provided dataset contained a significa
 | File | Type | Description |
 | :--- | :--- | :--- |
 | `solution.py` | `<Python Script>` | The complete autonomous ML pipeline (Preprocessing -> PCA/ICA -> K-Fold Training -> Blending -> Inference). |
+| `ml_arena_finale_top_50_teams/` | `<Folder>` | **[NEW]** Complete "Noble" Image Classification pipeline for the ML Arena Finale. |
 | `readme.txt`  | `<Documentation>` | The official ML Challenge dataset instructions and problem context guidelines. |
 | `FINAL.csv` | `<Data File>` | The successfully generated prediction matrix formatted precisely for competition evaluation (`ID, CLASS`). |
 | `.gitignore` | `<Config>` | Prevents tracking of the massive `TRAIN.csv` and `TEST.csv` files to keep the repository lightweight. |
