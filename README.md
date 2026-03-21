@@ -1,80 +1,86 @@
 <div align="center">
-  <img src="https://img.shields.io/badge/Status-Completed-success?style=for-the-badge" alt="Status Badge">
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Badge">
-  <img src="https://img.shields.io/badge/Scikit--Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" alt="Scikit-Learn Badge">
-  <img src="https://img.shields.io/badge/IEEE-00629B?style=for-the-badge&logo=ieee&logoColor=white" alt="IEEE Badge">
-  <img src="https://img.shields.io/badge/Finale--Ready-ConvNeXt-blueviolet?style=for-the-badge" alt="Finale Badge">
+  <img src="https://img.shields.io/badge/Suite-Noble--Ensemble-gold?style=for-the-badge&logo=icloud&logoColor=white" alt="Suite Badge">
+  <img src="https://img.shields.io/badge/Status-Technical--Finale-success?style=for-the-badge" alt="Status Badge">
+  <img src="https://img.shields.io/badge/Core-Advanced--ML-blue?style=for-the-badge&logo=gitbook&logoColor=white" alt="Core Badge">
+  <img src="https://img.shields.io/badge/AI-Antigravity--Optimized-9C27B0?style=for-the-badge" alt="AI Badge">
 
-  <h1>🏭 Fault Diagnostics Ensemble Pipeline</h1>
-  <p><b>An Advanced Machine Learning Architecture for High-Precision Hardware Anomaly Detection</b></p>
+  <h1>🏆 Noble-Ensemble Technical Suite</h1>
+  <p><b>Unified High-Precision Intelligence for Hardware Diagnostics & Scenario Recognition</b></p>
 </div>
 
 <br>
 
-## 📌 Project Overview
-Developed for a high-performance **Machine Learning Challenge**, this repository houses a highly robust machine learning pipeline designed to monitor and diagnose embedded subsystem health. 
+---
 
-The core objective is binary classification: determining whether a device is operating under **Normal (0)** or **Faulty (1)** conditions based on an anonymized dataset of 47 numerical sensor readings. These readings capture real-time performance metrics, internal states, and environmental interactions.
+## 🚀 Global Overview
 
-Facing challenges like heavy class imbalance and isolated sensor noise, this solution pushes beyond standard classification. By engineered deeply contextual meta-features and deploying a triad of gradient-boosted models, this pipeline maximizes predictive stability and recall.
+Welcome to the **Noble-Ensemble Technical Suite**, a comprehensive machine learning ecosystem developed for a high-stakes **Machine Learning Challenge**. This repository represents the convergence of two distinct yet complementary intelligence pipelines: **Predictive Sensor Analytics** and **High-Dimensional Image Classification**.
+
+By orchestrating advanced feature contextualization, multi-algorithmic ensembles, and state-of-the-art vision backbones, this suite delivers industry-grade predictive stability and generalization across heterogeneous datasets.
 
 ---
 
-## 🧠 Core Methodology & Architecture
+## 🧠 Integrated Intelligence
 
-Our approach is built upon two distinct pillars: **Dynamic Feature Contextualization** and **Multi-Algorithmic Variance Reduction**.
+The suite is divided into two specialized pillars, each addressing a unique domain of technical failure and recognition:
 
-### 1. Dynamic Feature Engineering
-Standard decision trees evaluate singular sensors at precise thresholds. However, subsystem failures often manifest as subtle drift *across* multiple sensors simultaneously. To capture these cascading anomalies, we dynamically expanded the dataset:
+### 1. Fault Diagnostics (Sensor-Based)
+*   **Domain**: Binary classification of hardware health (Normal vs. Faulty).
+*   **Input**: 47 anonymized sensor readings capturing real-time hardware telemetry.
+*   **Strategy**: A 5-Fold Stratified Ensemble of XGBoost, LightGBM, and CatBoost, powered by PCA/ICA feature decomposition.
 
-*   📊 **Row-Wise Statistical Signatures**: 
-    For every single operational cycle recorded, the pipeline computes the `mean`, `standard deviation`, `minimum`, `maximum`, `skewness`, and `kurtosis` across all 47 raw sensors. This creates a "global behavioral fingerprint" that allows the model to instantly detect if the hardware’s overall vibration, temperature, or voltage variance has spiked, regardless of individual sensor values.
-*   📉 **Dimensionality Reduction (PCA & ICA)**: 
-    We isolate macro-level variance by passing the standardized feature set through Principal Component Analysis (PCA) and Independent Component Analysis (ICA). This condenses the 47 sensors into 10 highly distinct meta-signals. PCA highlights the axes of maximum systemic stress, while ICA separates independent noise sources (like environmental interference) from genuine mechanical fault signals.
-
-### 2. The 5-Fold Stratified Ensemble
-Sensor data is notoriously noisy, and the provided dataset contained a significant class imbalance (approx. 60% Normal vs. 40% Faulty). To prevent our models from becoming biased toward the majority "Normal" class, we implemented a rigorously structured ensemble:
-
-*   🔄 **Stratified K-Fold Cross Validation (K=5)**: 
-    The training data is partitioned into 5 independent splits. The ratio of Normal to Faulty rows is strictly preserved in every split. The models train on 4 folds and validate on the 5th, ensuring they are only evaluated on data they have entirely never seen. This prevents data leakage and guarantees highly accurate performance metrics.
-*   ⚙️ **Tri-Algorithmic Blending**: 
-    No single algorithm is perfect. We train three distinct, state-of-the-art tree architectures simultaneously to compensate for each other's blind spots:
-    1.  **XGBoost (Extreme Gradient Boosting)**: Heavily regularized (Depth=6) and configured with explicit `scale_pos_weight` to aggressively penalize the model when it misclassifies minority fault events.
-    2.  **LightGBM**: Utilized for its highly efficient leaf-wise growth, which excels at finding optimal splits within the dense matrix of purely statistical PCA/ICA features.
-    3.  **CatBoost**: Applied as the ensemble's stabilizing anchor. Its symmetric tree structures and automated target-based weighting make it exceptionally resistant to the overfitting that traditional gradient boosters suffer from.
-*   🤝 **Soft Voting Mechanism**: 
-    The models do not output hard 0s and 1s during evaluation. Instead, they output the exact mathematical *probability* of a fault occurring. The pipeline averages the probabilities of XGBoost, LightGBM, and CatBoost together before making the final 0/1 decision.
+### 2. "Noble" Vision Suite (Image-Based)
+*   **Domain**: Fine-grained scene categorization (SUN397).
+*   **Input**: High-resolution spatial data across 397 distinct scene categories.
+*   **Strategy**: Vision-Transformer inspired **ConvNeXt** backbone with Mixup/CutMix regularization and Test-Time Augmentation (TTA).
 
 ---
 
-## 📂 Repository Structure
+## 📂 Core Architecture
 
-| File | Type | Description |
+| Component | Path | Description |
 | :--- | :--- | :--- |
-| `solution.py` | `<Python Script>` | The complete autonomous ML pipeline (Preprocessing -> PCA/ICA -> K-Fold Training -> Blending -> Inference). |
-| `noble_finale_technical_suite/` | `<Folder>` | **[NEW]** Complete "Noble" Image Classification pipeline for the Technical Finale. |
-| `readme.txt`  | `<Documentation>` | The official technical challenge dataset instructions and problem context guidelines. |
-| `FINAL.csv` | `<Data File>` | The successfully generated prediction matrix formatted precisely for competition evaluation (`ID, CLASS`). |
-| `.gitignore` | `<Config>` | Prevents tracking of the massive `TRAIN.csv` and `TEST.csv` files to keep the repository lightweight. |
-
-> [!NOTE] 
-> Due to GitHub file size limits and challenge policies, the raw training and testing datasets (`TRAIN.csv`, `TEST.csv`) are exclusively retained locally and are not hosted in this repository.
+| **Ensemble Pipeline** | [solution.py](file:///d:/ML_Arena/Fault-Detection-Ensemble-Pipeline/solution.py) | Autonomous ML pipeline for sensor-based diagnostics. |
+| **Noble Suite** | [noble_finale_technical_suite/](file:///d:/ML_Arena/Fault-Detection-Ensemble-Pipeline/noble_finale_technical_suite) | The "Technical Finale" image classification infrastructure. |
+| **Generated Results** | [FINAL.csv](file:///d:/ML_Arena/Fault-Detection-Ensemble-Pipeline/FINAL.csv) | Formatted prediction matrix for evaluation. |
+| **Technical Context** | [readme.txt](file:///d:/ML_Arena/Fault-Detection-Ensemble-Pipeline/readme.txt) | Original challenge constraints and dataset specifications. |
 
 ---
 
-## 🚀 Execution Instructions
+## 🛠️ Technical Implementation
 
-To execute the pipeline locally and reproduce the final prediction metrics, ensure you have a Python environment configured with the prerequisite machine learning libraries:
+### **Pillar I: Sensor Diagnostics**
+We utilize **Dynamic Feature Contextualization** to capture subtle drift across multiple sensors:
+- 📊 **Row-Wise Statistics**: Generates mean, std, skew, and kurtosis to identify systemic stress.
+- 📉 **Dimensionality Reduction**: PCA & ICA isolate noise from genuine mechanical fault signals.
+- 🤝 **Soft Voting**: Harmonizes XGBoost (minority penalty), LightGBM (leaf-wise growth), and CatBoost (overfit resistance).
 
+### **Pillar II: "Noble" Image Classification**
+A modern deep-learning approach inspired by recent architectural breakthroughs:
+- 🏢 **ConvNeXt Backbone**: Combines CNN efficiency with Transformer global fields.
+- 🔄 **Stochastic Regularization**: Mixup and CutMix for superior generalization.
+- 📈 **OneCycleLR**: Enables super-convergence for high-precision fine-tuning.
+
+---
+
+## 🚀 Execution Guide
+
+Ensure your environment is configured with `pandas`, `numpy`, `scikit-learn`, `xgboost`, `lightgbm`, `catboost`, `torch`, and `torchvision`.
+
+### Running Fault Diagnostics
 ```bash
-# 1. Install dependencies
-pip install pandas numpy scikit-learn xgboost lightgbm catboost
-
-# 2. Place datasets
-# Ensure TRAIN.csv and TEST.csv are placed securely in the repository's root directory.
-
-# 3. Execute the Ensemble
 python solution.py
 ```
 
-The script is entirely autonomous. It will systematically output the training loss of each fold, calculate final Out-Of-Fold (OOF) evaluation metrics (Accuracy, ROC AUC, F1), and instantly generate the compliant `FINAL.csv` file.
+### Running the Noble Vision Suite
+```bash
+cd noble_finale_technical_suite
+python train_kaggle_master.py
+```
+
+---
+
+<div align="center">
+  <p><i>Developed with precision by <b>Purvansh Joshi</b> & <b>Antigravity AI</b>.</i></p>
+  <img src="https://img.shields.io/badge/Engineered-with-E0E0E0?style=flat-square&logo=visual-studio-code&logoColor=007ACC" alt="Engineered">
+</div>
