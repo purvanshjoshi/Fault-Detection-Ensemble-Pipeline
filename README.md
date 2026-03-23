@@ -12,7 +12,7 @@
 
 ---
 
-## 🚀 Global Overview
+## 🚀 Global Overview:-
 
 Welcome to the **Noble-Ensemble Technical Suite**, a comprehensive machine learning ecosystem developed for a high-stakes **Machine Learning Challenge**. This repository represents the convergence of two distinct yet complementary intelligence pipelines: **Predictive Sensor Analytics** and **High-Dimensional Image Classification**.
 
@@ -20,7 +20,7 @@ By orchestrating advanced feature contextualization, multi-algorithmic ensembles
 
 ---
 
-## 🧠 Integrated Intelligence
+## 🧠 Integrated Intelligence:-
 
 The suite is divided into two specialized pillars, each addressing a unique domain of technical failure and recognition:
 
@@ -36,7 +36,7 @@ The suite is divided into two specialized pillars, each addressing a unique doma
 
 ---
 
-## 📂 Core Architecture
+## 📂 Core Architecture:-
 
 | Component | Path | Description |
 | :--- | :--- | :--- |
