@@ -2,7 +2,6 @@
   <img src="https://img.shields.io/badge/Suite-Noble--Ensemble-gold?style=for-the-badge&logo=icloud&logoColor=white" alt="Suite Badge">
   <img src="https://img.shields.io/badge/Status-Technical--Finale-success?style=for-the-badge" alt="Status Badge">
   <img src="https://img.shields.io/badge/Core-Advanced--ML-blue?style=for-the-badge&logo=gitbook&logoColor=white" alt="Core Badge">
-  <img src="https://img.shields.io/badge/AI-Antigravity--Optimized-9C27B0?style=for-the-badge" alt="AI Badge">
 
   <h1>🏆 Noble-Ensemble Technical Suite</h1>
   <p><b>Unified High-Precision Intelligence for Hardware Diagnostics & Scenario Recognition</b></p>
