@@ -34,9 +34,9 @@ The suite is divided into two specialized pillars, each addressing a unique doma
 *   **Strategy**: Vision-Transformer inspired **ConvNeXt** backbone with Mixup/CutMix regularization and Test-Time Augmentation (TTA).
 
 ### 3. Neural Nexus (Satellite-Based)
-*   **Domain**: High-performance satellite imagery classification.
-*   **Input**: Spectral spatial data for environmental and urban categorization.
-*   **Strategy**: **EfficientNet-B0** backbone with OneCycleLR scheduling and Macro F1 optimization for superior class-balanced precision.
+*   **Domain**: High-performance satellite imagery classification (Urban vs. Environmental).
+*   **Input**: High-resolution spectral spatial data (160x160 for TF, 224x224 for PyTorch).
+*   **Strategy**: Dual-pipeline architecture featuring **EfficientNet-B0** (PyTorch) and **ResNet101V2** (TensorFlow) backbones with **Automatic Mixed Precision (AMP)** and **OneCycleLR** for rapid convergence.
 
 ---
 
@@ -67,10 +67,11 @@ A modern deep-learning approach inspired by recent architectural breakthroughs:
 - 📈 **OneCycleLR**: Enables super-convergence for high-precision fine-tuning.
 
 ### **Pillar III: Neural Nexus (Satellite)**
-A specialized high-performance pipeline for overhead spatial data:
-- 🛰️ **EfficientNet-B0**: Efficient feature extraction with balanced depth and width.
-- ⚡ **OneCycleLR & AdamW**: Fast convergence and superior generalization on imbalanced data.
-- 🎯 **Macro F1 Optimization**: Precision-focused training to handle diverse satellite classes.
+A specialized, multi-framework high-performance pipeline for overhead spatial data:
+- 🛰️ **Architectural Dual-Core**: Support for **EfficientNet-B0** (balanced scaling) and **ResNet101V2** (deep feature extraction).
+- ⚡ **Performance Suite**: Integrated **Automatic Mixed Precision (AMP)** for 2x speedup and **Label Smoothing** for enhanced generalization.
+- 📈 **Fast Convergence**: **OneCycleLR** & **AdamW** enable a "Pro Max" target of 90%+ F1-Score in under 1 hour of training.
+- 🖼️ **Satellite-Specific Preprocessing**: Adaptive contrast adjustment and orientation-independent (360°) augmentations.
 
 ---
 
@@ -90,9 +91,15 @@ python train_kaggle_master.py
 ```
 
 ### Running Neural Nexus
+Execute the optimized PyTorch pipeline:
 ```bash
 cd NEURAL-Nexus
 python pytorch_satellite_script.py
+```
+Or use the Satellite-Optimized TensorFlow version:
+```bash
+cd NEURAL-Nexus
+python pro_training_script.py
 ```
 
 ---
