@@ -1,5 +1,7 @@
+"""
+Utility to patch the PyTorch satellite notebook with robust path detection.
+"""
 import json
-import os
 
 notebook_path = r"d:\BOOM BAAM\pytorch_satellite_notebook.ipynb"
 with open(notebook_path, 'r', encoding='utf-8') as f:
@@ -50,16 +52,30 @@ nb['cells'][7]['source'] = [
     "inv_label_map = {i: name for name, i in label_map.items()}\n",
     "print(f\"✅ Mapping: {label_map}\")\n",
     "\n",
-    "train_data, val_data = train_test_split(train_df_full, test_size=0.15, stratify=train_df_full['LABEL'], random_state=42)\n",
+    "train_data, val_data = train_test_split(\n",
+    "    train_df_full, test_size=0.15, stratify=train_df_full['LABEL'], random_state=42\n",
+    ")\n",
     "\n",
     "# Detect image directory casing\n",
-    "train_img_dir = 'train_images' if os.path.exists(os.path.join(BASE_PATH, 'train_images')) else 'Train_Images'\n",
+    "train_img_dir = 'train_images' if os.path.exists(\n",
+    "    os.path.join(BASE_PATH, 'train_images')\n",
+    ") else 'Train_Images'\n",
     "\n",
-    "train_ds = ImageDataset(train_data, os.path.join(BASE_PATH, train_img_dir), transform=train_transform, label_map=label_map)\n",
-    "val_ds = ImageDataset(val_data, os.path.join(BASE_PATH, train_img_dir), transform=val_transform, label_map=label_map)\n",
+    "train_ds = ImageDataset(\n",
+    "    train_data, os.path.join(BASE_PATH, train_img_dir), \n",
+    "    transform=train_transform, label_map=label_map\n",
+    ")\n",
+    "val_ds = ImageDataset(\n",
+    "    val_data, os.path.join(BASE_PATH, train_img_dir), \n",
+    "    transform=val_transform, label_map=label_map\n",
+    ")\n",
     "\n",
-    "train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=4, pin_memory=True)\n",
-    "val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True)\n",
+    "train_loader = DataLoader(\n",
+    "    train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=4, pin_memory=True\n",
+    ")\n",
+    "val_loader = DataLoader(\n",
+    "    val_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True\n",
+    ")\n",
     "\n",
     "# Model build\n",
     "model = models.efficientnet_b0(weights='DEFAULT')\n",
@@ -67,7 +83,10 @@ nb['cells'][7]['source'] = [
     "model = model.to(DEVICE)\n",
     "\n",
     "optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-3)\n",
-    "scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=LEARNING_RATE, steps_per_epoch=len(train_loader), epochs=EPOCHS)\n",
+    "scheduler = optim.lr_scheduler.OneCycleLR(\n",
+    "    optimizer, max_lr=LEARNING_RATE, \n",
+    "    steps_per_epoch=len(train_loader), epochs=EPOCHS\n",
+    ")\n",
     "criterion = nn.CrossEntropyLoss(label_smoothing=0.1)\n",
     "scaler = torch.cuda.amp.GradScaler()\n",
     "\n",
@@ -107,7 +126,9 @@ nb['cells'][7]['source'] = [
     "    \n",
     "    if val_f1 > best_f1:\n",
     "        best_f1 = val_f1\n",
-    "        torch.save({'model': model.state_dict(), 'inv_map': inv_label_map}, 'best_model.pth')\n",
+    "        torch.save(\n",
+        "    {'model': model.state_dict(), 'inv_map': inv_label_map}, 'best_model.pth'\n",
+        ")\n",
     "        print(\"🔥 New Best Model Saved!\")"
 ]
 
@@ -119,8 +140,12 @@ nb['cells'][9]['source'] = [
     "model.eval()\n",
     "\n",
     "test_df = pd.read_csv(os.path.join(BASE_PATH, 'Test.csv'))\n",
-    "test_img_dir = 'test_images' if os.path.exists(os.path.join(BASE_PATH, 'test_images')) else 'Test_Images'\n",
-    "test_ds = ImageDataset(test_df, os.path.join(BASE_PATH, test_img_dir), val_transform, is_test=True)\n",
+    "test_img_dir = 'test_images' if os.path.exists(\n",
+    "    os.path.join(BASE_PATH, 'test_images')\n",
+    ") else 'Test_Images'\n",
+    "test_ds = ImageDataset(\n",
+    "    test_df, os.path.join(BASE_PATH, test_img_dir), val_transform, is_test=True\n",
+    ")\n",
     "test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)\n",
     "\n",
     "preds = []\n",
@@ -130,7 +155,9 @@ nb['cells'][9]['source'] = [
     "        _, p = torch.max(outputs, 1)\n",
     "        preds.extend(p.cpu().numpy())\n",
     "\n",
-    "pd.DataFrame({'IMAGE': test_df['IMAGE'], 'LABEL': preds}).to_csv('FINAL.csv', index=False)\n",
+    "pd.DataFrame(\n",
+    "    {'IMAGE': test_df['IMAGE'], 'LABEL': preds}\n",
+    ").to_csv('FINAL.csv', index=False)\n",
     "print(f\"✅ DONE! Created FINAL.csv with Integer Labels.\")"
 ]
 

@@ -1,5 +1,8 @@
+# pylint: disable=duplicate-code
+"""
+Utility to patch the PyTorch satellite notebook with F1 scoring logic.
+"""
 import json
-import os
 
 notebook_path = r"d:\BOOM BAAM\pytorch_satellite_notebook.ipynb"
 with open(notebook_path, 'r', encoding='utf-8') as f:
@@ -73,10 +76,18 @@ nb['cells'][7]['source'] = [
     "inv_label_map = {i: name for name, i in label_map.items()}\n",
     "print(f\"✅ Mapping: {label_map}\")\n",
     "\n",
-    "train_data, val_data = train_test_split(train_df_full, test_size=0.15, stratify=train_df_full['LABEL'], random_state=42)\n",
+    "train_data, val_data = train_test_split(\n",
+    "    train_df_full, test_size=0.15, stratify=train_df_full['LABEL'], random_state=42\n",
+    ")\n",
     "\n",
-    "train_ds = ImageDataset(train_data, os.path.join(BASE_PATH, 'train_images'), transform=train_transform, label_map=label_map)\n",
-    "val_ds = ImageDataset(val_data, os.path.join(BASE_PATH, 'train_images'), transform=val_transform, label_map=label_map)\n",
+    "train_ds = ImageDataset(\n",
+    "    train_data, os.path.join(BASE_PATH, 'train_images'), \n",
+    "    transform=train_transform, label_map=label_map\n",
+    ")\n",
+    "val_ds = ImageDataset(\n",
+    "    val_data, os.path.join(BASE_PATH, 'train_images'), \n",
+    "    transform=val_transform, label_map=label_map\n",
+    ")\n",
     "\n",
     "train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)\n",
     "val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)\n",
@@ -87,7 +98,9 @@ nb['cells'][7]['source'] = [
     "model = model.to(DEVICE)\n",
     "\n",
     "optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-3)\n",
-    "scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=LEARNING_RATE, steps_per_epoch=len(train_loader), epochs=EPOCHS)\n",
+    "scheduler = optim.lr_scheduler.OneCycleLR(\n",
+    "    optimizer, max_lr=LEARNING_RATE, steps_per_epoch=len(train_loader), epochs=EPOCHS\n",
+    ")\n",
     "criterion = nn.CrossEntropyLoss(label_smoothing=0.1)\n",
     "\n",
     "best_f1 = 0.0\n",
@@ -108,7 +121,10 @@ nb['cells'][7]['source'] = [
     "        _, predicted = torch.max(outputs.data, 1)\n",
     "        train_total += labels.size(0)\n",
     "        train_correct += (predicted == labels).sum().item()\n",
-    "        pbar.set_postfix({'loss': f\"{train_loss/(pbar.n+1):.4f}\", 'acc': f\"{100*train_correct/train_total:.2f}%\"})\n",
+    "        pbar.set_postfix({\n",
+        "    'loss': f\"{train_loss/(pbar.n+1):.4f}\", \n",
+        "    'acc': f\"{100*train_correct/train_total:.2f}%\"\n",
+        "})\n",
     "\n",
     "    model.eval()\n",
     "    all_preds, all_labels = [], []\n",
@@ -126,7 +142,9 @@ nb['cells'][7]['source'] = [
     "    \n",
     "    if val_f1 > best_f1:\n",
     "        best_f1 = val_f1\n",
-    "        torch.save({'model': model.state_dict(), 'inv_map': inv_label_map}, 'best_model.pth')\n",
+    "        torch.save(\n",
+        "    {'model': model.state_dict(), 'inv_map': inv_label_map}, 'best_model.pth'\n",
+        ")\n",
     "        print(\"🔥 New Best Model Saved!\")"
 ]
 
@@ -139,7 +157,9 @@ nb['cells'][9]['source'] = [
     "model.eval()\n",
     "\n",
     "test_csv_df = pd.read_csv(os.path.join(BASE_PATH, 'Test.csv'))\n",
-    "test_ds = ImageDataset(test_csv_df, os.path.join(BASE_PATH, 'test_images'), val_transform, is_test=True)\n",
+    "test_ds = ImageDataset(\n",
+    "    test_csv_df, os.path.join(BASE_PATH, 'test_images'), val_transform, is_test=True\n",
+    ")\n",
     "test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)\n",
     "\n",
     "predictions = []\n",
@@ -150,7 +170,9 @@ nb['cells'][9]['source'] = [
     "        predictions.extend(preds.cpu().numpy())\n",
     "\n",
     "string_preds = [inv_map[p] for p in predictions]\n",
-    "pd.DataFrame({'IMAGE': test_csv_df['IMAGE'], 'LABEL': string_preds}).to_csv('FINAL.csv', index=False)\n",
+    "pd.DataFrame(\n",
+    "    {'IMAGE': test_csv_df['IMAGE'], 'LABEL': string_preds}\n",
+    ").to_csv('FINAL.csv', index=False)\n",
     "print(f\"✅ DONE! Created FINAL.csv with Best F1: {best_f1:.2f}%\")"
 ]
 

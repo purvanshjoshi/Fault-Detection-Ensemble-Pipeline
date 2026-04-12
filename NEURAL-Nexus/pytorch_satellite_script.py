@@ -1,3 +1,7 @@
+"""
+Neural Nexus: High-Performance Satellite Image Classification Pipeline.
+Powered by EfficientNet-B0 and OneCycleLR.
+"""
 import os
 import pandas as pd
 import torch
@@ -19,9 +23,9 @@ NUM_CLASSES = 10
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Path handling for main_dataset
-BASE_PATH = \"/kaggle/input/neural-nexus-internal-round/DATASET\" 
+BASE_PATH = "/kaggle/input/neural-nexus-internal-round/DATASET"
 if not os.path.exists(BASE_PATH):
-    BASE_PATH = \"./main_dataset/DATASET\"
+    BASE_PATH = "./main_dataset/DATASET"
 
 # --- 2. DATASET & AUGMENTATION ---
 class ImageDataset(Dataset):

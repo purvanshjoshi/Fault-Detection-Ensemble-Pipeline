@@ -1,5 +1,8 @@
+"""
+Comparison script for different tiers of image labels.
+Analyzes agreement and consensus across t1, t2, and t3.
+"""
 import pandas as pd
-import numpy as np
 
 # Load the tiers
 t1 = pd.read_csv(r"d:\BOOM BAAM\Grafestt\tier1.csv")
@@ -27,9 +30,9 @@ merged.rename(columns={'label': 'label_t3'}, inplace=True)
 all_agree = (merged['label_t1'] == merged['label_t2']) & (merged['label_t2'] == merged['label_t3'])
 print(f"\nAll 3 agree: {all_agree.sum()} / {len(merged)}")
 
-t1_t3_agree = (merged['label_t1'] == merged['label_t3'])
-t2_t3_agree = (merged['label_t2'] == merged['label_t3'])
-t1_t2_agree = (merged['label_t1'] == merged['label_t2'])
+t1_t3_agree = merged['label_t1'] == merged['label_t3']
+t2_t3_agree = merged['label_t2'] == merged['label_t3']
+t1_t2_agree = merged['label_t1'] == merged['label_t2']
 
 print(f"T1 and T3 agree: {t1_t3_agree.sum()}")
 print(f"T2 and T3 agree: {t2_t3_agree.sum()}")
@@ -37,13 +40,14 @@ print(f"T1 and T2 agree: {t1_t2_agree.sum()}")
 
 # Does T3 follow the majority? (Consensus)
 def consensus(row):
+    """Calculate consensus label across three tiers."""
     labels = [row['label_t1'], row['label_t2'], row['label_t3']]
     # Count most common
     counts = pd.Series(labels).value_counts()
     return counts.idxmax()
 
 merged['consensus'] = merged.apply(consensus, axis=1)
-t3_is_consensus = (merged['label_t3'] == merged['consensus'])
+t3_is_consensus = merged['label_t3'] == merged['consensus']
 print(f"T3 matches consensus: {t3_is_consensus.sum()} / {len(merged)}")
 
 # Are there many cases where T1 and T2 agree but T3 disagrees?
