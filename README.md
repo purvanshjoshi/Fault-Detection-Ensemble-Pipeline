@@ -34,6 +34,11 @@ The suite is divided into two specialized pillars, each addressing a unique doma
 *   **Input**: High-resolution spatial data across 397 distinct scene categories.
 *   **Strategy**: Vision-Transformer inspired **ConvNeXt** backbone with Mixup/CutMix regularization and Test-Time Augmentation (TTA).
 
+### 3. Neural Nexus (Satellite-Based)
+*   **Domain**: High-performance satellite imagery classification.
+*   **Input**: Spectral spatial data for environmental and urban categorization.
+*   **Strategy**: **EfficientNet-B0** backbone with OneCycleLR scheduling and Macro F1 optimization for superior class-balanced precision.
+
 ---
 
 ## 📂 Core Architecture
@@ -42,6 +47,7 @@ The suite is divided into two specialized pillars, each addressing a unique doma
 | :--- | :--- | :--- |
 | **Ensemble Pipeline** | [solution.py](file:///d:/ML_Arena/Fault-Detection-Ensemble-Pipeline/solution.py) | Autonomous ML pipeline for sensor-based diagnostics. |
 | **Noble Suite** | [noble_finale_technical_suite/](file:///d:/ML_Arena/Fault-Detection-Ensemble-Pipeline/noble_finale_technical_suite) | The "Technical Finale" image classification infrastructure. |
+| **Neural Nexus** | [NEURAL-Nexus/](file:///d:/ML_Arena/Fault-Detection-Ensemble-Pipeline/NEURAL-Nexus) | High-performance satellite imagery classification pipeline. |
 | **Generated Results** | [FINAL.csv](file:///d:/ML_Arena/Fault-Detection-Ensemble-Pipeline/FINAL.csv) | Formatted prediction matrix for evaluation. |
 | **Technical Context** | [readme.txt](file:///d:/ML_Arena/Fault-Detection-Ensemble-Pipeline/readme.txt) | Original challenge constraints and dataset specifications. |
 
@@ -61,6 +67,12 @@ A modern deep-learning approach inspired by recent architectural breakthroughs:
 - 🔄 **Stochastic Regularization**: Mixup and CutMix for superior generalization.
 - 📈 **OneCycleLR**: Enables super-convergence for high-precision fine-tuning.
 
+### **Pillar III: Neural Nexus (Satellite)**
+A specialized high-performance pipeline for overhead spatial data:
+- 🛰️ **EfficientNet-B0**: Efficient feature extraction with balanced depth and width.
+- ⚡ **OneCycleLR & AdamW**: Fast convergence and superior generalization on imbalanced data.
+- 🎯 **Macro F1 Optimization**: Precision-focused training to handle diverse satellite classes.
+
 ---
 
 ## 🚀 Execution Guide
@@ -76,6 +88,12 @@ python solution.py
 ```bash
 cd noble_finale_technical_suite
 python train_kaggle_master.py
+```
+
+### Running Neural Nexus
+```bash
+cd NEURAL-Nexus
+python pytorch_satellite_script.py
 ```
 
 ---
